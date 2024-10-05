@@ -9,10 +9,10 @@ import java.time.LocalDate;
 @Getter
 public class TransactionDTO {
 
-    private Long account_from;
-    private Long account_to;
-    private String currency_shortname;
+    private Long accountFrom;
+    private Long accountTo;
+    private String currencyShortname;
     private BigDecimal sum;
-    private String expense_category;
+    private String expenseCategory;
     private LocalDate datetime;
 }

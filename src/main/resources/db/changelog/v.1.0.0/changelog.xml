@@ -9,5 +9,7 @@
 
     <include file="create-table-transactions.xml" relativeToChangelogFile="true"/>
     <include file="create-table-limits.xml" relativeToChangelogFile="true"/>
+    <include file="added-column-in-table-exchange_rates.xml" relativeToChangelogFile="true"/>
+    <include file="added-column-in-table-transactions-limit_id.xml" relativeToChangelogFile="true"/>
 
 </databaseChangeLog>

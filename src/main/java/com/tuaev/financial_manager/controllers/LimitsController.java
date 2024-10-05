@@ -1,32 +1,26 @@
 package com.tuaev.financial_manager.controllers;
 
-import com.tuaev.financial_manager.services.ExchangeRateService;
+import com.tuaev.financial_manager.dto.LimitDTO;
+import com.tuaev.financial_manager.services.limit.LimitCreate;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.io.IOException;
 
 @RestController
 @AllArgsConstructor
 public class LimitsController {
 
-    private ExchangeRateService exchangeRateService;
+    private LimitCreate limitCreate;
 
-    @PutMapping("/limits")
-    public void updateLimit(){
-
+    @PostMapping("/limit")
+    public void createLimit(@RequestBody LimitDTO limitDTO){
+        limitCreate.create(limitDTO);
     }
 
     @GetMapping("/limits")
-    public void getLimits() throws IOException, InterruptedException {
-        //exchangeRateService.saveExchangeRate();
+    public void getLimits(){
     }
 
-    @GetMapping("/limits/{userId}")
-    public void getLimitsByUserId(@PathVariable("userId") Long userId){
-
-    }
 }

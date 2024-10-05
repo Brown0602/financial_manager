@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Setter
 @Getter
@@ -12,11 +13,18 @@ import java.time.LocalDateTime;
 @Table(name = "limits")
 public class Limit {
 
+    @OneToMany(mappedBy = "limit")
+    private List<Transaction> transactions;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private BigDecimal limit_sum;
-    private LocalDateTime limit_datetime;
-    private String limit_currency_shortname;
+    @Column(name = "limit_sum")
+    private BigDecimal Sum;
+    @Column(name = "limit_datetime")
+    private LocalDateTime dateTime;
+    @Column(name = "limit_currency_shortname")
+    private String currencyShortname;
+    @Column(name = "category")
     private String category;
 }

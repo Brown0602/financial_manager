@@ -12,15 +12,19 @@ import java.time.LocalDateTime;
 @Table(name = "transactions")
 public class Transaction {
 
+    @ManyToOne
+    @JoinColumn(name = "limit_id")
+    private Limit limit;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private Long account_from;
-    private Long account_to;
-    private String currency_shortname;
+    private Long accountFrom;
+    private Long accountTo;
+    private String currencyShortname;
     private BigDecimal sum;
-    private String expense_category;
+    private String expenseCategory;
     private LocalDateTime datetime;
-    private boolean limit_exceeded;
+    private boolean limitExceeded;
 
 }
