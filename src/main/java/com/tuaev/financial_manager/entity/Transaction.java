@@ -11,11 +11,6 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "transactions")
 public class Transaction {
-
-    @ManyToOne
-    @JoinColumn(name = "limit_id")
-    private Limit limit;
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
@@ -34,5 +29,7 @@ public class Transaction {
     private LocalDateTime datetime;
     @Column(name = "limit_exceeded")
     private Boolean limitExceeded;
-
+    @ManyToOne
+    @JoinColumn(name = "limit_id")
+    private Limit limit;
 }

@@ -13,9 +13,6 @@ import java.util.List;
 @Table(name = "limits")
 public class Limit {
 
-    @OneToMany(mappedBy = "limit")
-    private List<Transaction> transactions;
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
@@ -28,4 +25,6 @@ public class Limit {
     private String currencyShortname;
     @Column(name = "category")
     private String category;
+    @OneToMany(mappedBy = "limit")
+    private List<Transaction> transactions;
 }

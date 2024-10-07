@@ -8,7 +8,6 @@ import java.time.LocalDate;
 @Setter
 @Getter
 public class TransactionDTO {
-
     private Long accountFrom;
     private Long accountTo;
     private String currencyShortname;

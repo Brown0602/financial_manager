@@ -3,7 +3,6 @@ package com.tuaev.financial_manager.dto;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.Setter;
-
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.Map;
@@ -19,7 +18,7 @@ public class ExchangeRateDTO {
     @Setter
     public static class Meta{
         @JsonProperty("last_updated_at")
-        private OffsetDateTime last_update_at;
+        private OffsetDateTime lastUpdateAt;
     }
     @Getter
     @Setter

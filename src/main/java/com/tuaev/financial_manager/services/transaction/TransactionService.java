@@ -5,13 +5,11 @@ import com.tuaev.financial_manager.entity.ExchangeRate;
 import com.tuaev.financial_manager.entity.Limit;
 import com.tuaev.financial_manager.entity.Transaction;
 import com.tuaev.financial_manager.repositories.TransactionRepo;
-import com.tuaev.financial_manager.services.exchangeRate.*;
+import com.tuaev.financial_manager.services.exchange_rate.*;
 import com.tuaev.financial_manager.services.limit.LimitService;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
-import org.hibernate.annotations.DialectOverride;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestBody;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -20,23 +18,14 @@ import java.util.List;
 
 @Service
 @AllArgsConstructor
-public class TransactionService implements TransactionSave, TransactionIsCorrectCurrency, TransactionConversionInUSD, TransactionIsCategoryCorrect, TransactionSettingLimitByCategory{
+public class TransactionService implements TransactionServiceSaveTransaction {
 
-    private ExchangeRateCheckingTheCorrectDate exchangeRateCheckingTheCorrectDate;
+    private ExchangeRateServiceGetCurrentExchangeRates exchangeRateServiceGetCurrentExchangeRates;
     private LimitService limitService;
     private TransactionRepo transactionRepo;
-    private List<ExchangeRate> exchangeRates;
-    private ExchangeRateIfEmptyOrSizeNull exchangeRateIfEmptyOrSizeNull;
 
-    @Override
-    public Boolean isCorrectCurrency(List<ExchangeRate> exchangeRates, String shortnameCurrency) {
-        return exchangeRates.stream().anyMatch(exchangeRate ->
-                exchangeRate.getCurrencyPair().equals(shortnameCurrency + "/USD"));
-    }
-
-    @Override
-    public BigDecimal conversion(List<ExchangeRate> exchangeRates, BigDecimal sum, String shortnameCurrency) {
-        for (ExchangeRate exchangeRate:exchangeRates) {
+    private BigDecimal conversion(List<ExchangeRate> exchangeRates, BigDecimal sum, String shortnameCurrency) {
+        for (ExchangeRate exchangeRate : exchangeRates) {
             if (exchangeRate.getCurrencyPair().equals(shortnameCurrency + "/USD")) {
                 return new BigDecimal(String.valueOf(sum)).divide(exchangeRate.getClose(), 2, RoundingMode.HALF_UP);
             }
@@ -44,54 +33,49 @@ public class TransactionService implements TransactionSave, TransactionIsCorrect
         return null;
     }
 
-    @Override
-    public Transaction settingLimitByCategory(TransactionDTO transactionDTO, Transaction transaction){
+    private Limit getLimitByCategory(TransactionDTO transactionDTO, List<ExchangeRate> exchangeRates) {
         Limit limit = limitService.lastLimitByCategory(transactionDTO);
-            if (transactionDTO.getExpenseCategory().equals(limit.getCategory())){
+        if (limit != null) {
+            if (transactionDTO.getExpenseCategory().equals(limit.getCategory())) {
                 BigDecimal remainsLimit = new BigDecimal(String.valueOf(limit.getSum())).subtract(conversion(exchangeRates, transactionDTO.getSum(), transactionDTO.getCurrencyShortname()));
                 limit.setSum(remainsLimit);
-                limitService.save(limit);
-                if (limit.getSum().signum() == -1){
-                    transaction.setLimit(null);
-                }
-                if (limit.getSum().signum() != -1){
-                    transaction.setLimit(limit);
-                    transaction.setLimitExceeded(false);
-                }
-                if (limit.getSum().signum() == -1 && transaction.getLimit() == null){
-                    transaction.setLimitExceeded(null);
-                }
+                limitService.updateLimit(limit);
+                return limit;
             }
+        }
+        return null;
+    }
+
+    private Boolean limitFlag(Limit limit) {
+        if (limit != null) {
+            if (limit.getSum().signum() == -1) {
+                return true;
+            }
+            if (limit.getSum().signum() == 1) {
+                return false;
+            }
+        }
+        return null;
+    }
+
+    private Transaction createTransaction(TransactionDTO transactionDTO, List<ExchangeRate> exchangeRates) throws IOException, InterruptedException {
+        Transaction transaction = new Transaction();
+        transaction.setAccountFrom(transactionDTO.getAccountFrom());
+        transaction.setAccountTo(transactionDTO.getAccountTo());
+        transaction.setCurrencyShortname(transactionDTO.getCurrencyShortname());
+        transaction.setSum(conversion(exchangeRates, transactionDTO.getSum(), transactionDTO.getCurrencyShortname()));
+        transaction.setExpenseCategory(transactionDTO.getExpenseCategory());
+        transaction.setDatetime(LocalDateTime.now());
+        transaction.setLimit(getLimitByCategory(transactionDTO, exchangeRates));
+        transaction.setLimitExceeded(limitFlag(transaction.getLimit()));
         return transaction;
     }
 
     @Transactional
     @Override
-    public String save(@RequestBody TransactionDTO transactionDTO) throws IOException, InterruptedException {
-        exchangeRates = exchangeRateIfEmptyOrSizeNull.ifEmptyOrSizeNull(exchangeRates);
-        exchangeRates = exchangeRateCheckingTheCorrectDate.checkingTheCorrectDate(exchangeRates);
-        Transaction transaction = new Transaction();
-        transaction = settingLimitByCategory(transactionDTO, transaction);
-        transaction.setAccountFrom(transactionDTO.getAccountFrom());
-        transaction.setAccountTo(transactionDTO.getAccountTo());
-        if (isCorrectCurrency(exchangeRates, transactionDTO.getCurrencyShortname())){
-            transaction.setCurrencyShortname(transactionDTO.getCurrencyShortname());
-        }else {
-            return "Неправильная валюта";
-        }
-        transaction.setSum(conversion(exchangeRates, transactionDTO.getSum(), transactionDTO.getCurrencyShortname()));
-        transaction.setDatetime(LocalDateTime.now());
-        if (isCategoryCorrect(transactionDTO.getExpenseCategory())) {
-            transaction.setExpenseCategory(transactionDTO.getExpenseCategory());
-        }else {
-            return "Такой категории нет";
-        }
+    public void saveTransaction(TransactionDTO transactionDTO) throws IOException, InterruptedException {
+        List<ExchangeRate> exchangeRates = exchangeRateServiceGetCurrentExchangeRates.getCurrentExchangeRates();
+        Transaction transaction = createTransaction(transactionDTO, exchangeRates);
         transactionRepo.save(transaction);
-        return "";
-    }
-
-    @Override
-    public Boolean isCategoryCorrect(String category) {
-        return category.equals("Товары") || category.equals("Услуги");
     }
 }

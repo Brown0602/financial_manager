@@ -9,34 +9,38 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-
 @AllArgsConstructor
 @Service
-public class LimitService implements LimitCreate, LimitGetAllLimits{
+public class LimitService implements LimitServiceSaveLimit, LimitGetAllLimits, LimitServiceUpdateLimit{
 
     private LimitRepo limitRepo;
 
     @Override
-    public void create(LimitDTO limitDTO){
+    public void updateLimit(Limit limit){
+        limitRepo.save(limit);
+    }
+
+    private Limit createLimit(LimitDTO limitDTO){
         Limit limit = new Limit();
         limit.setSum(limitDTO.getLimitSum());
         limit.setDateTime(LocalDateTime.now());
         limit.setCurrencyShortname(limitDTO.getLimitCurrencyShortname());
         limit.setCategory(limitDTO.getCategory());
-        limitRepo.save(limit);
+        return limit;
     }
-
     public Limit lastLimitByCategory(TransactionDTO transactionDTO){
         Optional<Limit> limitOptional = limitRepo.lastLimitByCategory(transactionDTO.getExpenseCategory());
         return limitOptional.orElse(null);
     }
 
-    public void save(Limit limit){
+    @Override
+    public void save(LimitDTO limitDTO){
+        Limit limit = createLimit(limitDTO);
         limitRepo.save(limit);
     }
-
     @Override
     public List<Limit> getAllLimits(){
         return null;
     }
+
 }

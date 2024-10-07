@@ -4,6 +4,6 @@ import com.tuaev.financial_manager.dto.LimitDTO;
 import org.springframework.stereotype.Service;
 
 @Service
-public interface LimitCreate {
-    void create(LimitDTO limitDTO);
+public interface LimitServiceSaveLimit {
+    void save(LimitDTO limitDTO);
 }

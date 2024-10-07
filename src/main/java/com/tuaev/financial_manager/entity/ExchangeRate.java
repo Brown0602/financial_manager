@@ -17,5 +17,5 @@ public class ExchangeRate {
     private LocalDate date;
     private String currencyPair;
     private BigDecimal close;
-    private BigDecimal previous_close;
+    private BigDecimal previousClose;
 }

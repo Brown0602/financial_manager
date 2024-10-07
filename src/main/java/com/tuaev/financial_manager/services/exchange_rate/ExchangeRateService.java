@@ -1,4 +1,4 @@
-package com.tuaev.financial_manager.services.exchangeRate;
+package com.tuaev.financial_manager.services.exchange_rate;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
@@ -18,34 +18,31 @@ import java.util.List;
 
 @Service
 @AllArgsConstructor
-public class ExchangeRateService implements ExchangeRateSave, ExchangeRateIfEmptyOrSizeNull, ExchangeRateCheckingTheCorrectDate{
+public class ExchangeRateService implements ExchangeRateServiceGetCurrentExchangeRates{
 
     private ExchangeRateRepo exchangeRateRepo;
 
     @Override
-    public List<ExchangeRate> checkingTheCorrectDate(List<ExchangeRate> exchangeRates) throws IOException, InterruptedException {
-        if (exchangeRates.stream().noneMatch(exchangeRate -> exchangeRate.getDate().equals(LocalDate.now().minusDays(1)))){
+    public List<ExchangeRate> getCurrentExchangeRates() throws IOException, InterruptedException {
+        List<ExchangeRate> currentExchangeRates = exchangeRateRepo.findAll();
+        if (currentExchangeRates.isEmpty()){
+            saveExchangeRates();
+            currentExchangeRates = exchangeRateRepo.findAll();
+        }
+        if (isDateCorrect(currentExchangeRates)){
             exchangeRateRepo.deleteAll();
-            save();
-            exchangeRates = exchangeRateRepo.findAll();
+            saveExchangeRates();
+            currentExchangeRates = exchangeRateRepo.findAll();
         }
-        return exchangeRates;
+        return currentExchangeRates;
     }
 
-    @Override
-    public List<ExchangeRate> ifEmptyOrSizeNull(List<ExchangeRate> exchangeRates) throws IOException, InterruptedException {
-        if (exchangeRates.isEmpty()){
-            exchangeRates = exchangeRateRepo.findAll();
-        }
-        if (exchangeRates.size() == 0){
-            save();
-            exchangeRates = exchangeRateRepo.findAll();
-        }
-        return exchangeRates;
+    private Boolean isDateCorrect(List<ExchangeRate> exchangeRates){
+        return exchangeRates.stream().noneMatch(exchangeRate ->
+                exchangeRate.getDate().equals(LocalDate.now().minusDays(1)));
     }
 
-    @Override
-    public void save() throws IOException, InterruptedException {
+    private void saveExchangeRates() throws IOException, InterruptedException {
         String url = "https://api.currencyapi.com/v3/latest?apikey=cur_live_VARInFyu46RQ4Y3hL70HUdqZkPpJXa2DBKWB0iAs";
         HttpClient httpClient = HttpClient.newHttpClient();
         HttpRequest httpRequest = HttpRequest.
@@ -60,7 +57,7 @@ public class ExchangeRateService implements ExchangeRateSave, ExchangeRateIfEmpt
                     ExchangeRate exchangeRate = new ExchangeRate();
                     exchangeRate.setClose(currencyData.getValue());
                     exchangeRate.setCurrencyPair(currencyData.getCode() + "/USD");
-                    exchangeRate.setDate(exchangeRateDTO.getMeta().getLast_update_at().toLocalDate());
+                    exchangeRate.setDate(exchangeRateDTO.getMeta().getLastUpdateAt().toLocalDate());
                     exchangeRateRepo.save(exchangeRate);
             }
         });
