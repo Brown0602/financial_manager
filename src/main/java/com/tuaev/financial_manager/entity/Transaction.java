@@ -18,13 +18,21 @@ public class Transaction {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
     private Long id;
+    @Column(name = "account_from")
     private Long accountFrom;
+    @Column(name = "account_to")
     private Long accountTo;
+    @Column(name = "currency_shortname")
     private String currencyShortname;
+    @Column(name = "sum")
     private BigDecimal sum;
+    @Column(name = "expense_category")
     private String expenseCategory;
+    @Column(name = "datetime")
     private LocalDateTime datetime;
-    private boolean limitExceeded;
+    @Column(name = "limit_exceeded")
+    private Boolean limitExceeded;
 
 }

@@ -6,8 +6,10 @@ import com.tuaev.financial_manager.entity.Limit;
 import com.tuaev.financial_manager.entity.Transaction;
 import com.tuaev.financial_manager.repositories.TransactionRepo;
 import com.tuaev.financial_manager.services.exchangeRate.*;
+import com.tuaev.financial_manager.services.limit.LimitService;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
+import org.hibernate.annotations.DialectOverride;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
 import java.io.IOException;
@@ -18,9 +20,10 @@ import java.util.List;
 
 @Service
 @AllArgsConstructor
-public class TransactionService implements TransactionSave, TransactionIsCorrectCurrency, TransactionConversionInUSD, TransactionIsCategoryCorrect{
+public class TransactionService implements TransactionSave, TransactionIsCorrectCurrency, TransactionConversionInUSD, TransactionIsCategoryCorrect, TransactionSettingLimitByCategory{
 
     private ExchangeRateCheckingTheCorrectDate exchangeRateCheckingTheCorrectDate;
+    private LimitService limitService;
     private TransactionRepo transactionRepo;
     private List<ExchangeRate> exchangeRates;
     private ExchangeRateIfEmptyOrSizeNull exchangeRateIfEmptyOrSizeNull;
@@ -38,8 +41,28 @@ public class TransactionService implements TransactionSave, TransactionIsCorrect
                 return new BigDecimal(String.valueOf(sum)).divide(exchangeRate.getClose(), 2, RoundingMode.HALF_UP);
             }
         }
-
         return null;
+    }
+
+    @Override
+    public Transaction settingLimitByCategory(TransactionDTO transactionDTO, Transaction transaction){
+        Limit limit = limitService.lastLimitByCategory(transactionDTO);
+            if (transactionDTO.getExpenseCategory().equals(limit.getCategory())){
+                BigDecimal remainsLimit = new BigDecimal(String.valueOf(limit.getSum())).subtract(conversion(exchangeRates, transactionDTO.getSum(), transactionDTO.getCurrencyShortname()));
+                limit.setSum(remainsLimit);
+                limitService.save(limit);
+                if (limit.getSum().signum() == -1){
+                    transaction.setLimit(null);
+                }
+                if (limit.getSum().signum() != -1){
+                    transaction.setLimit(limit);
+                    transaction.setLimitExceeded(false);
+                }
+                if (limit.getSum().signum() == -1 && transaction.getLimit() == null){
+                    transaction.setLimitExceeded(null);
+                }
+            }
+        return transaction;
     }
 
     @Transactional
@@ -48,6 +71,7 @@ public class TransactionService implements TransactionSave, TransactionIsCorrect
         exchangeRates = exchangeRateIfEmptyOrSizeNull.ifEmptyOrSizeNull(exchangeRates);
         exchangeRates = exchangeRateCheckingTheCorrectDate.checkingTheCorrectDate(exchangeRates);
         Transaction transaction = new Transaction();
+        transaction = settingLimitByCategory(transactionDTO, transaction);
         transaction.setAccountFrom(transactionDTO.getAccountFrom());
         transaction.setAccountTo(transactionDTO.getAccountTo());
         if (isCorrectCurrency(exchangeRates, transactionDTO.getCurrencyShortname())){

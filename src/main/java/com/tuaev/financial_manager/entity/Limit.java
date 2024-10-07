@@ -18,6 +18,7 @@ public class Limit {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
     private Long id;
     @Column(name = "limit_sum")
     private BigDecimal Sum;
