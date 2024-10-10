@@ -18,7 +18,7 @@ import java.util.List;
 
 @Service
 @AllArgsConstructor
-public class ExchangeRateService implements ExchangeRateServiceGetCurrentExchangeRates{
+public class ExchangeRateService implements GetCurrentExchangeRatesService {
 
     private ExchangeRateRepo exchangeRateRepo;
 
@@ -29,7 +29,7 @@ public class ExchangeRateService implements ExchangeRateServiceGetCurrentExchang
             saveExchangeRates();
             currentExchangeRates = exchangeRateRepo.findAll();
         }
-        if (isDateCorrect(currentExchangeRates)){
+        if (Boolean.TRUE.equals(isDateCorrect(currentExchangeRates))){
             exchangeRateRepo.deleteAll();
             saveExchangeRates();
             currentExchangeRates = exchangeRateRepo.findAll();

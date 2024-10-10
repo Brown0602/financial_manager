@@ -1,10 +1,9 @@
 package com.tuaev.financial_manager.controllers;
 
 import com.tuaev.financial_manager.dto.TransactionDTO;
-import com.tuaev.financial_manager.services.exchange_rate.ExchangeRateServiceGetCurrentExchangeRates;
-import com.tuaev.financial_manager.services.transaction.TransactionServiceSaveTransaction;
-import com.tuaev.financial_manager.services.transaction.transaction_validator.TransactionValidatorIsCategoryCorrect;
-import com.tuaev.financial_manager.services.transaction.transaction_validator.TransactionValidatorIsCorrectCurrency;
+import com.tuaev.financial_manager.services.exchange_rate.GetCurrentExchangeRatesService;
+import com.tuaev.financial_manager.services.transaction.TransactionSaveService;
+import com.tuaev.financial_manager.services.transaction.transaction_validator.Validation;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -16,27 +15,24 @@ import java.io.IOException;
 @AllArgsConstructor
 public class TransactionalController {
 
-    private ExchangeRateServiceGetCurrentExchangeRates exchangeRateServiceGetCurrentExchangeRates;
-    private TransactionValidatorIsCorrectCurrency transactionValidatorIsCorrectCurrency;
-    private TransactionValidatorIsCategoryCorrect transactionValidatorIsCategoryCorrect;
-    private TransactionServiceSaveTransaction transactionServiceSaveTransaction;
+    private GetCurrentExchangeRatesService getCurrentExchangeRatesService;
+    private Validation validation;
+    private TransactionSaveService transactionSaveService;
 
     @PostMapping("/transaction")
     public String saveTransaction(@RequestBody TransactionDTO transactionDTO) throws IOException, InterruptedException {
         if (
-                !transactionValidatorIsCorrectCurrency.isCorrectCurrency(exchangeRateServiceGetCurrentExchangeRates.getCurrentExchangeRates(), transactionDTO.getCurrencyShortname())
-                ||
-                !transactionValidatorIsCategoryCorrect.isCategoryCorrect(transactionDTO.getExpenseCategory())
+                Boolean.TRUE.equals(!validation.isCurrencyCorrect(getCurrentExchangeRatesService.getCurrentExchangeRates(), transactionDTO.getCurrencyShortname()))
+                || Boolean.TRUE.equals(!validation.isCategoryCorrect(transactionDTO.getExpenseCategory()))
             ){
             return "Ошибка! Неверная валюта или неверная категория транзакции!";
         }
-        transactionServiceSaveTransaction.saveTransaction(transactionDTO);
+        transactionSaveService.saveTransaction(transactionDTO);
         return "";
     }
 
     @GetMapping("/transactions/exceeded")
     public void getTransactionsLimit(){
-
+        // Пока ничего нет
     }
-
 }

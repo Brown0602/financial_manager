@@ -23,13 +23,13 @@ public class Transaction {
     private String currencyShortname;
     @Column(name = "sum")
     private BigDecimal sum;
-    @Column(name = "expense_category")
+    @Column(name = "category")
     private String expenseCategory;
     @Column(name = "datetime")
     private LocalDateTime datetime;
-    @Column(name = "limit_exceeded")
+    @Column(name = "exceeded")
     private Boolean limitExceeded;
     @ManyToOne
-    @JoinColumn(name = "limit_id")
+    @JoinColumn(name = "limit_id", referencedColumnName = "id")
     private Limit limit;
 }

@@ -17,11 +17,11 @@ public class Limit {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private Long id;
-    @Column(name = "limit_sum")
-    private BigDecimal Sum;
-    @Column(name = "limit_datetime")
+    @Column(name = "sum")
+    private BigDecimal sum;
+    @Column(name = "datetime")
     private LocalDateTime dateTime;
-    @Column(name = "limit_currency_shortname")
+    @Column(name = "currency_shortname")
     private String currencyShortname;
     @Column(name = "category")
     private String category;

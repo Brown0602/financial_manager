@@ -8,8 +8,9 @@ import java.time.LocalDateTime;
 @Setter
 @Getter
 public class LimitDTO {
-    private BigDecimal limitSum;
+    private BigDecimal sum;
     private LocalDateTime dateTime;
-    private String limitCurrencyShortname;
+    private String currencyShortname;
     private String category;
+    private Long account;
 }

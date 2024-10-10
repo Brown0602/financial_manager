@@ -9,6 +9,6 @@ import java.util.Optional;
 
 @Repository
 public interface LimitRepo extends JpaRepository<Limit, Long> {
-    @Query(value = "SELECT * FROM limits WHERE category = :category ORDER BY limits.limit_datetime DESC LIMIT 1", nativeQuery = true)
+    @Query(value = "SELECT * FROM limits WHERE category = :category ORDER BY limits.datetime DESC LIMIT 1", nativeQuery = true)
     Optional<Limit> lastLimitByCategory(@Param("category") String category);
 }

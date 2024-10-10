@@ -14,8 +14,10 @@ public class ExchangeRate {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private LocalDate date;
-    private String currencyPair;
+    @Column(name = "close")
     private BigDecimal close;
-    private BigDecimal previousClose;
+    @Column(name = "currency_pair")
+    private String currencyPair;
+    @Column(name = "date")
+    private LocalDate date;
 }
