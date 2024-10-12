@@ -4,6 +4,7 @@ import com.tuaev.financial_manager.dto.LimitDTO;
 import com.tuaev.financial_manager.dto.TransactionDTO;
 import com.tuaev.financial_manager.entity.Limit;
 import com.tuaev.financial_manager.repositories.LimitRepo;
+import com.tuaev.financial_manager.services.transaction.transaction_validator.Category;
 import com.tuaev.financial_manager.services.transaction.transaction_validator.Currency;
 import lombok.AllArgsConstructor;
 import org.hibernate.type.descriptor.java.LocalDateJavaType;

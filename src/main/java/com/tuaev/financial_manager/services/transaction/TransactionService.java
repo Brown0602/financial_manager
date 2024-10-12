@@ -7,6 +7,7 @@ import com.tuaev.financial_manager.entity.Transaction;
 import com.tuaev.financial_manager.repositories.TransactionRepo;
 import com.tuaev.financial_manager.services.exchange_rate.*;
 import com.tuaev.financial_manager.services.limit.DefaultLimitService;
+import com.tuaev.financial_manager.services.transaction.transaction_validator.Category;
 import com.tuaev.financial_manager.services.transaction.transaction_validator.Currency;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
@@ -22,7 +23,7 @@ import java.util.List;
 @AllArgsConstructor
 public class TransactionService implements TransactionSaveService {
 
-    private GetCurrentExchangeRatesService exchangeRateServiceGetCurrentExchangeRates;
+    private GetCurrentExchangeRatesService getCurrentExchangeRatesService;
     private DefaultLimitService limitService;
     private TransactionRepo transactionRepo;
 
@@ -62,18 +63,16 @@ public class TransactionService implements TransactionSaveService {
         transaction.setDatetime(LocalDateTime.now());
         transaction.setLimit(getLimitByCategory(transactionDTO, exchangeRates));
         transaction.setLimitExceeded(limitFlag(transaction.getLimit()));
-        //dshsdhshdshsdh
         return transaction;
     }
 
     @Transactional
     @Override
     public void saveTransaction(TransactionDTO transactionDTO) throws IOException, InterruptedException {
-        LocalDate today = LocalDate.now();
 
 
 
-        List<ExchangeRate> exchangeRates = exchangeRateServiceGetCurrentExchangeRates.getCurrentExchangeRates();
+        List<ExchangeRate> exchangeRates = getCurrentExchangeRatesService.getCurrentExchangeRates();
         Transaction transaction = createTransaction(transactionDTO, exchangeRates);
         transactionRepo.save(transaction);
     }
