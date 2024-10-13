@@ -8,5 +8,6 @@
     <include file="create-table-exchange_rates.xml" relativeToChangelogFile="true"/>
     <include file="create-table-clients.xml" relativeToChangelogFile="true"/>
     <include file="added-column-in-table-limits.xml" relativeToChangelogFile="true"/>
+    <include file="added-column-in-table-limits(2).xml" relativeToChangelogFile="true"/>
 
 </databaseChangeLog>

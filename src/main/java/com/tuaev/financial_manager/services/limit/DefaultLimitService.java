@@ -4,14 +4,11 @@ import com.tuaev.financial_manager.dto.LimitDTO;
 import com.tuaev.financial_manager.dto.TransactionDTO;
 import com.tuaev.financial_manager.entity.Limit;
 import com.tuaev.financial_manager.repositories.LimitRepo;
-import com.tuaev.financial_manager.services.transaction.transaction_validator.Category;
 import com.tuaev.financial_manager.services.transaction.transaction_validator.Currency;
 import lombok.AllArgsConstructor;
-import org.hibernate.type.descriptor.java.LocalDateJavaType;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -32,6 +29,7 @@ public class DefaultLimitService implements LimitService{
         limit.setDateTime(LocalDateTime.now());
         limit.setCurrencyShortname(limitDTO.getCurrencyShortname());
         limit.setCategory(limitDTO.getCategory());
+        limit.setDateLimit(limitDTO.getSum());
         return limit;
     }
 

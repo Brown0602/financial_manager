@@ -1,6 +1,7 @@
 package com.tuaev.financial_manager.entity;
 
 import jakarta.persistence.*;
+import java.util.List;
 
 @Entity
 @Table(name = "clients")
@@ -15,4 +16,6 @@ public class Client {
     private String name;
     @Column( name = "last_name")
     private String lastName;
+    @OneToMany(mappedBy = "client")
+    private List<Limit> limits;
 }

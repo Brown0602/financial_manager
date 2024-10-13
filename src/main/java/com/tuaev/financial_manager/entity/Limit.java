@@ -27,4 +27,9 @@ public class Limit {
     private String category;
     @OneToMany(mappedBy = "limit")
     private List<Transaction> transactions;
+    @ManyToOne
+    @JoinColumn(name = "client_id", referencedColumnName = "id")
+    private Client client;
+    @Column(name = "date_limit")
+    private BigDecimal dateLimit;
 }
